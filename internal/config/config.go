@@ -12,12 +12,12 @@ type Config struct {
 }
 
 func Read() (Config, error) {
-	workingDir, err := os.Getwd()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return Config{}, err
 	}
 
-	configPath := filepath.Join(workingDir, ".gatorconfig.json")
+	configPath := filepath.Join(homeDir, ".gatorconfig.json")
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -36,12 +36,12 @@ func Read() (Config, error) {
 func (c *Config) SetUser(username string) error {
 	c.CurrentUserName = username
 
-	workingDir, err := os.Getwd()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return err
 	}
 
-	configPath := filepath.Join(workingDir, ".gatorconfig.json")
+	configPath := filepath.Join(homeDir, ".gatorconfig.json")
 
 	data, err := json.Marshal(c)
 	if err != nil {

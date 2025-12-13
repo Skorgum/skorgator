@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/skorgum/skorgator/internal/config"
 )
@@ -13,15 +14,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = cfg.SetUser("skorgum")
-	if err != nil {
-		log.Fatal(err)
-	}
+	s := &state{cfg: &cfg}
 
-	cfg, err = config.Read()
-	if err != nil {
-		log.Fatal(err)
-	}
+	commands := &commands{registeredCommands: make(map[string]func(*state, command) error)}
+	commands.register("login", handlerLogin)
 
-	fmt.Printf("%+v\n", cfg)
+	if len(os.Args) < 2 {
+		fmt.Println("No command provided")
+		os.Exit(1)
+	}
+	cmd := command{os.Args[1], os.Args[2:]}
+	err = commands.run(s, cmd)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
 }
