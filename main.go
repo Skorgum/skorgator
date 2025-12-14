@@ -1,12 +1,20 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
+	_ "github.com/lib/pq"
 	"github.com/skorgum/skorgator/internal/config"
+	"github.com/skorgum/skorgator/internal/database"
 )
+
+type state struct {
+	db  *database.Queries
+	cfg *config.Config
+}
 
 func main() {
 	cfg, err := config.Read()
@@ -14,10 +22,22 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := &state{cfg: &cfg}
+	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	dbQueries := database.New(db)
+
+	s := &state{
+		db:  dbQueries,
+		cfg: &cfg,
+	}
 
 	commands := &commands{registeredCommands: make(map[string]func(*state, command) error)}
 	commands.register("login", handlerLogin)
+	commands.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("No command provided")

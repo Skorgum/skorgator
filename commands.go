@@ -2,17 +2,11 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/skorgum/skorgator/internal/config"
 )
 
-type state struct {
-	cfg *config.Config
-}
-
 type command struct {
-	name string
-	args []string
+	Name string
+	Args []string
 }
 
 type commands struct {
@@ -20,10 +14,10 @@ type commands struct {
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	if handler, exists := c.registeredCommands[cmd.name]; exists {
+	if handler, exists := c.registeredCommands[cmd.Name]; exists {
 		return handler(s, cmd)
 	}
-	return fmt.Errorf("unknown command: %s", cmd.name)
+	return fmt.Errorf("unknown command: %s", cmd.Name)
 }
 
 func (c *commands) register(name string, f func(*state, command) error) {
