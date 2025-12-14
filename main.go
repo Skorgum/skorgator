@@ -38,6 +38,7 @@ func main() {
 	commands := &commands{registeredCommands: make(map[string]func(*state, command) error)}
 	commands.register("login", handlerLogin)
 	commands.register("register", handlerRegister)
+	commands.register("reset", handlerReset)
 
 	if len(os.Args) < 2 {
 		fmt.Println("No command provided")
