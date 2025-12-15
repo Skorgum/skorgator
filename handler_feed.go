@@ -37,14 +37,39 @@ func handlerAddFeed(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("couldn't create feed: %w", err)
 	}
-	printFeed(feed)
+	fmt.Println("Feed created successfully:")
+	printFeed(feed, user)
 	return nil
 }
 
-func printFeed(feed database.Feed) {
-	fmt.Println("Feed created successfully:")
+func printFeed(feed database.Feed, owner database.User) {
 	fmt.Println("ID:", feed.ID)
 	fmt.Println("Name:", feed.Name)
 	fmt.Println("URL:", feed.Url)
-	fmt.Println("UserID:", feed.UserID)
+	fmt.Println("Owner:", owner.Name)
+}
+
+func handlerListFeeds(s *state, cmd command) error {
+	ctx := context.Background()
+
+	feeds, err := s.db.GetFeeds(ctx)
+	if err != nil {
+		return fmt.Errorf("couldn't list feeds: %w", err)
+	}
+
+	if len(feeds) == 0 {
+		fmt.Println("No feeds found.")
+		return nil
+	}
+
+	fmt.Println("Feeds:")
+	for _, feed := range feeds {
+		owner, err := s.db.GetUserByID(ctx, feed.UserID.UUID)
+		if err != nil {
+			return fmt.Errorf("couldn't get feed owner: %w", err)
+		}
+		printFeed(feed, owner)
+		fmt.Println("-----")
+	}
+	return nil
 }
